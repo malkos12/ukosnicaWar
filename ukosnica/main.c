@@ -18,11 +18,11 @@
 //parametry konfiguracyjne
 #define maxScreen 5  //ilosc ekranów które widzi uzytkownik, nie dotyczy ekranów wyswietlanych np podczas bazowania
 
-uint8_t normalSpeed=25; //szybkosc przesowu
+uint8_t normalSpeed=15; //szybkosc przesowu
 #define baseSpeed 100 // 1-255 im wiecej tym wolniej
 #define minAngle 0 // jeżeli minus to od 0 do 180 czyli kąt razy 2
 #define maxAngle 180 // dla 180 kat +45st dla 90 0st
-#define maxSetpoint 10436 //maxSetpoint
+#define maxSetpoint 11000 //maxSetpoint
 #define minSetpoint 0
 
 #define lcdFrequance 4000 // odswierzanie wyswietlacza
@@ -90,7 +90,7 @@ uint8_t normalSpeed=25; //szybkosc przesowu
 //pozycja
 //uint16_t turnsValue;
 uint8_t encoderValue;
-uint32_t aPosition=0;
+uint32_t aPosition=7086;
 uint8_t lastEncoderAngle=0;
 
 uint8_t actualEncoderAngle=0;
@@ -100,8 +100,8 @@ uint32_t lastMemoryFactor=0;
 uint8_t angleSet;
 uint8_t i;
 //uint8_t angleCurrent;
-uint32_t angleFactor=57975;
-uint32_t lastFactor=57975;
+uint32_t angleFactor=171;
+uint32_t lastFactor=171;
 uint32_t setpoint=0;
 
 
@@ -114,7 +114,7 @@ bool goToPositionEnable=false;
 
 //wyswietlacz
 int currentSet=0;
-uint32_t setPosition;
+uint32_t setPosition=90;;
 uint16_t lcdTimer=0;
 uint32_t pulsPosition;
 
@@ -125,7 +125,7 @@ uint8_t baseActual = 1; // czy wymagane bazowanie 1 - nie wymagane; 0- wymagane
 
 //do enkodera sterowania
 uint32_t val;
-int initialValue=180;
+int initialValue=90;
 
 //stale
 static uint8_t grayTable[256] = {127, 126, 124, 125, 121, 120, 122, 123, 115, 114, 112, 113, 117, 116, 118, 119, 103, 102, 100, 101, 97, 96, 98, 99, 107, 106, 104, 105, 109, 108, 110, 111, 79, 78, 76, 77, 73, 72, 74, 75, 67, 66, 64, 65, 69, 68, 70, 71, 87, 86, 84, 85, 81, 80, 82, 83, 91, 90, 88, 89, 93, 92, 94, 95, 31, 30, 28, 29, 25, 24, 26, 27, 19, 18, 16, 17, 21, 20, 22, 23, 7, 6, 4, 5, 1, 0, 2, 3, 11, 10, 8, 9, 13, 12, 14, 15, 47, 46, 44, 45, 41, 40, 42, 43, 35, 34, 32, 33, 37, 36, 38, 39, 55, 54, 52, 53, 49, 48, 50, 51, 59, 58, 56, 57, 61, 60, 62, 63, 191, 190, 188, 189, 185, 184, 186, 187, 179, 178, 176, 177, 181, 180, 182, 183, 167, 166, 164, 165, 161, 160, 162, 163, 171, 170, 168, 169, 173, 172, 174, 175, 143, 142, 140, 141, 137, 136, 138, 139, 131, 130, 128, 129, 133, 132, 134, 135, 151, 150, 148, 149, 145, 144, 146, 147, 155, 154, 152, 153, 157, 156, 158, 159, 223, 222, 220, 221, 217, 216, 218, 219, 211, 210, 208, 209, 213, 212, 214, 215, 199, 198, 196, 197, 193, 192, 194, 195, 203, 202, 200, 201, 205, 204, 206, 207, 239, 238, 236, 237, 233, 232, 234, 235, 227, 226, 224, 225, 229, 228, 230, 231, 247, 246, 244, 245, 241, 240, 242, 243, 251, 250, 248, 249, 253, 252, 254, 255};
@@ -164,7 +164,7 @@ void enableDriveIfNotInPosition(void);
 ISR( TIMER0_COMP_vect )
 {
 
-    if((goToPositionEnable==true && currentSet==0) |(currentSet==2 && manualEnable==true)) 	//(()||(baseActual=0)||(goEnable==true)) //(przejaz w trybie manualnym),(bazowanie),(dojazd do pozycji zadanej)
+    if((goToPositionEnable==true && currentSet==0)|| (goToPositionEnable==true && currentSet==4) || (currentSet==2 && manualEnable==true)) 	//(()||(baseActual=0)||(goEnable==true)) //(przejaz w trybie manualnym),(bazowanie),(dojazd do pozycji zadanej)
     {
        pulsInvert;
 //		if(goToPositionEnable==true)
@@ -215,6 +215,9 @@ int main( void )
     register_enc_event_callback( my_encoder );
     register_enc_event_sw_callback( enc_switch );
     set_encoder( initialValue );
+
+    actualAngle();
+    lastEncoderAngle=actualEncoderAngle;
 
 //ustawienie timera do generowania impulsów
     TCCR0 |= ( 1 << WGM01 ); //tryb CTC timera
@@ -339,7 +342,7 @@ void enc_switch( void )
     {
         //set_encoder(val);
         screenEncoderEnableInvert;
-        setpoint=setPosition*angleFactor/1000;
+        setpoint=(uint32_t)setPosition*10000/(uint32_t)angleFactor;
         enableDriveIfNotInPosition();
 
     }
@@ -360,6 +363,7 @@ void enc_switch( void )
     else if(currentSet==4)
 	{
     	screenEncoderEnableInvert; //enable adjusting setpoint
+    	set_encoder(aPosition);
     	enableDriveIfNotInPosition(); //run if in not correct position
 
 	}
@@ -513,7 +517,7 @@ void goToPosition(void)
 	actualPosition();
 
 
-if(currentSet==0)
+if(currentSet==0 || currentSet==4)
 {
 
 
@@ -599,8 +603,8 @@ if(currentSet==0)
     lcd_str_P( PSTR( "A:" ) );
     lcd_str( " __ " );
      lcd_locate( 1, 8 );
-    lcd_str_P( PSTR( "P:" ) );
-    lcd_str( " __ " );
+    lcd_str_P( PSTR( "S:" ) );
+    lcd_str( " " );
 
         lcd_locate( 1, 3 );
           //lcd_int( actualEncoderAngle);
@@ -608,10 +612,7 @@ if(currentSet==0)
         lcd_str( "  " );
         lcd_locate( 1, 10 );
         lcd_int(setpoint);
-        lcd_str( "  " );
-        lcd_int(goToPositionEnable);
-     //  lcd_int(actualEncoderAngle);
-         lcd_str( "  " );
+
 
 
         // lcd_locate( 0, 0 );
@@ -689,8 +690,8 @@ if(currentSet==0)
  {
 	    lcd_cls();
 	    lcd_locate(0,0);
-	    lcd_str("Setpoint");
-	    lcd_locate( 1, 0 );
+	    lcd_str("Setpoint: " );
+	    lcd_locate( 10,0 );
 
 	      if(screenEncoderEnable) {drive(); lcd_char('[');}
 
@@ -699,7 +700,7 @@ if(currentSet==0)
 	       if(screenEncoderEnable) lcd_char(']');
 
 	       //druga linia wyswietlacza
-	       lcd_locate( 1, 3 );
+	       lcd_locate( 1, 0 );
 	       lcd_str("Actual: ");  lcd_int( aPosition );
 
 
@@ -729,7 +730,7 @@ if(currentSet==0)
 
 void setZero ()
 {
-	aPosition=maxAngle/2*angleFactor/1000;
+	aPosition=0;
 	lastEncoderAngle=actualEncoderAngle;
 }
 
