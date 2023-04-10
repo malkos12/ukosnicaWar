@@ -24,6 +24,8 @@ uint8_t normalSpeed=25; //szybkosc przesowu
 #define baseSpeed 100 // 1-255 im wiecej tym wolniej
 #define minAngle 0 // jeżeli minus to od 0 do 180 czyli kąt razy 2
 #define maxAngle 180 // dla 180 kat +45st dla 90 0st
+#define maxSetpoint 12000
+#define minSetpoint 0
 
 #define lcdFrequance 4000 // odswierzanie wyswietlacza
 
@@ -156,6 +158,7 @@ void lcdRefresh(void);
 void goToPosition(void);
 void baseRequire(void);
 void setZero(void);
+void enableDriveIfNotInPosition(void);
 
 
 //---------------------------------przerwania-----------------------
@@ -303,6 +306,14 @@ void my_encoder( void ) {
       {
     	  invertDirection;
       }
+      else if(currentSet==4)
+      {
+          //min max_encoderaSterowania
+          if(val>=maxSetpoint)  val=maxSetpoint;
+          if(val<minSetpoint)     val=minSetpoint;
+          set_encoder( val);
+          setpoint=val;
+      }
       else if(currentSet==5)
       {
     	  //min max_encoderaSterowania
@@ -331,10 +342,8 @@ void enc_switch( void )
         //set_encoder(val);
         screenEncoderEnableInvert;
         setpoint=setPosition*angleFactor/1000;
-        if(screenEncoderEnable==false && aPosition!=setpoint){
-        	goToPositionEnable=true;
+        enableDriveIfNotInPosition();
 
-        }
     }
     else if(currentSet==1)
     {
@@ -349,6 +358,12 @@ void enc_switch( void )
     else if(currentSet==3)
 	{
 		setZero();
+	}
+    else if(currentSet==4)
+	{
+    	screenEncoderEnableInvert; //enable adjusting setpoint
+    	enableDriveIfNotInPosition(); //run if in not correct position
+
 	}
     else if(currentSet==5)
 	{	set_encoder(normalSpeed);
@@ -674,9 +689,25 @@ if(currentSet==0)
  //ekran 5
  if(currentSet==4)
  {
-    lcd_cls();
-    lcd_locate(0,0);
-    lcd_str("Bazowanie...");
+	    lcd_cls();
+	    lcd_locate(0,0);
+	    lcd_str("Setpoint");
+	    lcd_locate( 1, 0 );
+
+	      if(screenEncoderEnable) {drive(); lcd_char('[');}
+
+	       		   lcd_int(setpoint);
+
+	       if(screenEncoderEnable) lcd_char(']');
+
+	       //druga linia wyswietlacza
+	       lcd_locate( 1, 3 );
+	       lcd_str("Actual: ");  lcd_int( aPosition );
+
+
+
+
+
 
  }
 
@@ -702,6 +733,13 @@ void setZero ()
 {
 	aPosition=maxAngle/2*angleFactor/1000;
 	lastEncoderAngle=actualEncoderAngle;
+}
+
+void enableDriveIfNotInPosition()
+{
+    if(screenEncoderEnable==false && aPosition!=setpoint){
+    	goToPositionEnable=true;
+    }
 }
 
 
