@@ -5,7 +5,6 @@
 *       Poprawki: 2023.04
 */
 
-
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include<stdbool.h>
@@ -16,7 +15,6 @@
 #include <stdlib.h>
 #include <avr/eeprom.h>
 
-
 //parametry konfiguracyjne
 #define maxScreen 5  //ilosc ekranów które widzi uzytkownik, nie dotyczy ekranów wyswietlanych np podczas bazowania
 
@@ -24,7 +22,7 @@ uint8_t normalSpeed=25; //szybkosc przesowu
 #define baseSpeed 100 // 1-255 im wiecej tym wolniej
 #define minAngle 0 // jeżeli minus to od 0 do 180 czyli kąt razy 2
 #define maxAngle 180 // dla 180 kat +45st dla 90 0st
-#define maxSetpoint 12000
+#define maxSetpoint 10436 //maxSetpoint
 #define minSetpoint 0
 
 #define lcdFrequance 4000 // odswierzanie wyswietlacza
