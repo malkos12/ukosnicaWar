@@ -16,7 +16,7 @@
 #include <avr/eeprom.h>
 
 //parametry konfiguracyjne
-#define maxScreen 5  //ilosc ekranów które widzi uzytkownik, nie dotyczy ekranów wyswietlanych np podczas bazowania
+#define maxScreen 6  //ilosc ekranów które widzi uzytkownik, nie dotyczy ekranów wyswietlanych np podczas bazowania
 
 uint8_t normalSpeed=15; //szybkosc przesowu
 #define baseSpeed 100 // 1-255 im wiecej tym wolniej
@@ -25,7 +25,7 @@ uint8_t normalSpeed=15; //szybkosc przesowu
 #define maxSetpoint 11000 //maxSetpoint
 #define minSetpoint 0
 
-#define lcdFrequance 4000 // odswierzanie wyswietlacza
+#define lcdFrequance 1000 // odswierzanie wyswietlacza
 
 //PINOUT
 //-------------------------------------------------------------------------------------------------------------
@@ -202,7 +202,7 @@ int main( void )
     onEnable;
     PORTB |= directionPIN; // ustawienie 1-prawo? 0-lewo po starcie w prawo
     DDRB &= ~basePIN;      //ustawienie czujników jako wejscia
-    PORTB |= basePIN;      //podciagnięcie do plus
+    //PORTB |= basePIN;      //podciagnięcie do plus
 
     DDRC &= ( 1 << PC0 ) | ( 1 << PC1 ) | ( 1 << PC2 ) | ( 1 << PC3 ) | ( 1 << PC4 ) | ( 1 << PC5 ) | ( 1 << PC6 ) | ( 1 << PC7 );         //port encodera pozycji ustawiony jako WEJSCIE
     PORTC = 0xff;                                                                                                                         // podciągniecie do plusa przez wewnetrzny rezystor
@@ -254,7 +254,7 @@ BEEP;
     lcd_str_P( PSTR( "Step Motor Driver" ) );
     lcd_locate( 1, 0 );
     lcd_str_P( PSTR( "ver. 0.9   by MM" ) );
-    _delay_ms(100);
+    _delay_ms(3000);
     display_lcd( currentSet );
 
 
