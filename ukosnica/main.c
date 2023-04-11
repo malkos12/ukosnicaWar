@@ -69,6 +69,7 @@ uint8_t normalSpeed=15; //szybkosc przesowu
 #define invertDirection motorDirection=!motorDirection
 #define onDirectionPin PORTB |= directionPIN
 #define offDirectionPin PORTB &=~directionPIN
+#define baseSensorActive !(PINB & basePIN)
 
 
 #define screenEncoderEnableInvert screenEncoderEnable=!screenEncoderEnable
@@ -90,6 +91,7 @@ uint8_t normalSpeed=15; //szybkosc przesowu
 //pozycja
 //uint16_t turnsValue;
 uint8_t encoderValue;
+uint8_t baseSensor=0;
 uint32_t aPosition=7086;
 uint8_t lastEncoderAngle=0;
 
@@ -273,6 +275,9 @@ BEEP;
 
     lcdRefresh();
    // saveIfFactorChange();
+    if(baseSensorActive)baseSensor=1;
+    else baseSensor=0;
+
 
 
     }
@@ -724,6 +729,18 @@ if(currentSet==0)
        		   lcd_int(normalSpeed);
 
        if(screenEncoderEnable) lcd_char(']');
+
+ }
+
+ //ekran 7
+ if(currentSet==6)
+ {
+    lcd_cls();
+    lcd_locate(0,0);
+    lcd_str("Bazowanie");
+    lcd_locate( 1, 0 );
+    lcd_int(baseSensor);
+
 
  }
 }
