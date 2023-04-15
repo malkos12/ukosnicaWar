@@ -70,11 +70,13 @@ uint8_t normalSpeed=15; //szybkosc przesowu
 #define onDirectionPin PORTB |= directionPIN
 #define offDirectionPin PORTB &=~directionPIN
 #define baseSensorActive !(PINB & basePIN)
+#define goToBaseSensorInvert goToBaseSensor=!goToBaseSensor
 
 
 #define screenEncoderEnableInvert screenEncoderEnable=!screenEncoderEnable
 //#define currentSetInvert currentSet=!currentSet
 #define invertManualEnable manualEnable=!manualEnable
+
 
 
 #define BUZ_OFF   PORTD &= ~BUZ
@@ -112,6 +114,8 @@ bool screenEncoderEnable= false;
 bool manualEnable=false;
 bool baseAllowed=false;
 bool goToPositionEnable=false;
+bool goToBaseSensor=false;
+
 
 
 //wyswietlacz
@@ -166,7 +170,7 @@ void enableDriveIfNotInPosition(void);
 ISR( TIMER0_COMP_vect )
 {
 
-    if((goToPositionEnable==true && currentSet==0)|| (goToPositionEnable==true && currentSet==4) || (currentSet==2 && manualEnable==true)) 	//(()||(baseActual=0)||(goEnable==true)) //(przejaz w trybie manualnym),(bazowanie),(dojazd do pozycji zadanej)
+    if((goToPositionEnable==true && currentSet==0)|| (goToPositionEnable==true && currentSet==4) || (currentSet==2 && manualEnable==true) || (currentSet==6 && goToBaseSensor==true)) 	//(()||(baseActual=0)||(goEnable==true)) //(przejaz w trybie manualnym),(bazowanie),(dojazd do pozycji zadanej)
     {
        pulsInvert;
 //		if(goToPositionEnable==true)
@@ -178,14 +182,15 @@ ISR( TIMER0_COMP_vect )
 
 //---przerwanie od czujnika bazy----
 //po najechaniu na czujnik weyzerój pozycje aktualną
-//ISR(INT2_vect)
-//{
-//    aPosition=0;
-//    baseActual=1;
-//    motorDirection=true;
-//    currentSet=0;
-//	OCR0 = normalSpeed;
-//}
+ISR(INT2_vect)
+{
+   // aPosition=0;
+    //baseActual=1;
+  //  motorDirection=true;
+   // currentSet=0;
+	//OCR0 = normalSpeed;
+	goToBaseSensor=false;
+}
 
 //---------------------------------petla glówna----------------------------------------------------------
 int main( void )
@@ -376,6 +381,10 @@ void enc_switch( void )
 	{	set_encoder(normalSpeed);
 	 OCR0 = normalSpeed;
     	 screenEncoderEnableInvert;
+	}
+    else if(currentSet==6)
+	{
+    	goToBaseSensorInvert;
 	}
 
     display_lcd( currentSet );
