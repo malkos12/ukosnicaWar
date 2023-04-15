@@ -492,6 +492,12 @@ void saveIfFactorChange(void)
 
 //BAZOWANIE
 //----------------------------------------------------------------------------
+void base(void)
+{
+	OCR0 = baseSpeed;//ustaw wolna predkosc
+	motorDirection=false;//ustaw kierunek w kierunku czujnika
+}
+
 
 void baseRequire(void)
 {
